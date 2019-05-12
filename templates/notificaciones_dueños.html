@@ -1,0 +1,55 @@
+{% extends "base_notificaciones.html" %}
+
+{% block content %}
+    
+  {% for i in solicitudes %}
+    {% if dueño_actual == i.Vivienda.dueño.correo_dueño %}
+      {% if i.estado == "Pendiente" %}
+        <p>El estudiante {{i.Estudiante.username}}, quiere entrar en la vivienda con el código {{i.Vivienda.codigo_Vivienda}} con dirección {{i.Vivienda.direccion_exacta}}, desea quedarse desde el "{{i.fecha_entrada}}" hasta el "{{i.fecha_salida}}".</p>
+        <p>Te puedes contactar con el al siguiente número  {{i.Estudiante.contacto}} o al correo {{i.Estudiante.correo_estudiante}}</p>
+        <p></p>
+
+        <table>
+          <td>
+            <form method="post" action="{{ url_for('volverInicio') }}">
+              <button class = "sender" data-value="{{i.codigo_Solicitud}}"> Aceptar </button>
+            </form>
+          </td>
+          <td>
+            <form method="post" action="{{ url_for('volverInicio') }}">
+              <button class = "negar" data-value="{{i.codigo_Solicitud}}">Rechazar</button>
+            </form>
+          </td>
+        </table>
+        
+
+
+        
+       
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+    
+  <script>
+    
+    //Enviar el código de la solicitud
+    var elements = document.querySelectorAll(".sender");
+    for(var i = 0; i < elements.length ; i++){
+      elements[i].addEventListener("click", function(){
+        console.log($(this).attr('data-value'));
+        $.post("notificacionesDueño", {'id':$(this).attr('data-value'),'num':1});
+      });
+    }
+
+
+    var elements1 = document.querySelectorAll(".negar");
+    for(var i = 0; i < elements1.length ; i++){
+      elements1[i].addEventListener("click", function(){
+        console.log($(this).attr('data-value'));
+        $.post("notificacionesDueño", {'id':$(this).attr('data-value'),'num':0});
+      });
+    }
+
+  </script>
+
+{% endblock %}

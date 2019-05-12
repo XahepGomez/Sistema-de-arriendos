@@ -1,0 +1,18 @@
+{% extends "base_registros.html" %}
+
+{% block content %}
+    <form method="post" action="{{ url_for('registro_dueño') }}">
+        <p> Ingresa tu nombre completo </p>
+        <p><input name="username" type="text"></p>
+        <p> Ingresa tu contraseña </p>
+        <p><input name="password" type="password"></p>
+        <p> Ingresa tu correo </p>
+            <p><input name="correo" type="text"></p>
+        <p> Ingresa tu número movil </p>
+        <p><input name="contacto" type="text"></p>
+        <p> Ingresa tu idioma </p>
+        <p><input name="idioma" type="text"></p>
+
+        <button class="w3-button w3-black w3-padding-large w3-large w3-margin-top">Sign up</button>
+    </form>
+{% endblock %}

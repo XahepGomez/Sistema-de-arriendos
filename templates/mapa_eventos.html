@@ -1,0 +1,186 @@
+{% extends "leaflet.html" %}
+
+{% block content2 %}
+
+<p id = "Nombre_sitio_info" style="display: none;"></p>
+<p></p>
+<p id = "Descripcion_sitio_info" style="display: none;"></p>
+<p></p>
+<p style="display: none;" id = "msg"> Ingrese el nombre del evento </p>
+<p></p>
+<input style="display: none;" id = "nombre_evento">
+<p></p>
+<p style="display: none;" id = "msg5"> Ingrese la descripción del evento </p>
+<p></p>
+<input style="display: none;" id = "descripcion_evento">
+<p></p>
+<p style="display: none;" id = "msg1"> Hora del evento</p>
+<p></p>
+<input style="display: none;" id = "hora_evento">
+<p></p>
+<p style="display: none;" id = "msg3"> Día del evento</p>
+<p></p>
+<input style="display: none;" id = "dia_evento">
+<p></p>
+<p style="display: none;" id = "msg2">¿Está abierto a todo público?</p>
+<p></p>
+<select name="abierto" id="abierto" style="display: none;" >
+    <option value="Si">Si</option> 
+    <option value="No">No</option> 
+</select>
+<p></p>
+
+
+<button id = "mostrar" style="display: none;">Crear evento en este sitio</button>
+<p></p>
+<p id = "msg4" style="display: none;">Eventos que tiene el lugar </p>
+<p></p>
+<form method="post" action="{{ url_for('volverInicio') }}">
+    <p id = "info_evento" style="display: none;"></p>
+</form>
+
+<p id = "guardar_participacion"></p>
+<p></p>
+<form method="post" action="{{ url_for('volverInicio') }}">
+    <button id = "guardar" style="display: none;">Guardar evento</button>
+</form>
+
+
+<script type="text/javascript">
+    
+    var greenIcon = L.icon({
+        iconUrl:  'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png   ',
+        iconSize:     [25, 41], // size of the icon
+        shadowSize:   [50, 64], // size of the shadow
+        iconAnchor:   [12, 41], // point of the icon which will correspond to marker's location
+        shadowAnchor: [4, 62],  // the same for the shadow
+        popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+
+    });
+
+ 
+    var sitios = {{sitios|tojson|safe}};
+    var eventos = {{eventos|tojson|safe}};
+
+    var marker = new Array();
+    var marker_sitios = new Array(); 
+ 
+    for (var r = 0; r < sitios.length; r++) {
+        var single = sitios[r];
+        var LamMarker = L.marker([single.latitud, single.longitud],{icon: greenIcon,descripcion:single.descripcion,nombre_sitio:single.nombre_sitio,codigo_interes:single.codigo});
+        console.log(single.Num)
+        marker_sitios.push(LamMarker);
+        marker_sitios[r].on('click', mostrar_Eventos);
+        marker_sitios[r].addTo(mymap);
+    };
+
+    function mostrar_Eventos(e) {
+        var i = this.options;
+        console.log(i);
+        event = e;
+        //Guardo el código del sitios de interes
+        u = i.codigo_interes;
+        document.getElementById('msg').style.display = "none";
+        document.getElementById('msg1').style.display = "none";
+        document.getElementById('msg2').style.display = "none";
+        document.getElementById('msg3').style.display = "none";
+        document.getElementById('msg5').style.display = "none";
+        document.getElementById('nombre_evento').style.display = "none";
+        document.getElementById('descripcion_evento').style.display = "none";
+        document.getElementById('hora_evento').style.display = "none";
+        document.getElementById('dia_evento').style.display = "none";
+        document.getElementById('abierto').style.display = "none";
+        document.getElementById('guardar').style.display = "none";
+        document.getElementById('Nombre_sitio_info').style.display = "inline";
+        document.getElementById('Nombre_sitio_info').innerHTML = "Nombre del sitio: " + i.nombre_sitio + "<p></p>";
+        document.getElementById('Descripcion_sitio_info').style.display = "inline";
+        document.getElementById('Descripcion_sitio_info').innerHTML = "Descripción: " + i.descripcion;
+        document.getElementById('mostrar').style.display = "inline";
+        document.getElementById('msg4').style.display = "inline";
+        document.getElementById('info_evento').style.display = "inline";
+        document.getElementById('info_evento').innerHTML = "";
+        document.getElementById('guardar_participacion').innerHTML = "";
+
+        var contador = 0;
+        var elements = [];
+        for(var r = 0; r< eventos.length;r++){
+            if(eventos[r].codigo_sitio_interes == i.codigo_interes){
+                contador = contador + 1;
+
+                var parrafo = document.createElement("p");
+                var contenido = document.createTextNode("Evento " + (contador) + ", Nombre: " + eventos[r].nombre_evento + ", Descripción del evento: " + eventos[r].descripcion_evento + ", organizado por " + eventos[r].estudiante_dueño + ". Es el día " + eventos[r].fecha + " a las " + eventos[r].hora);
+                parrafo.appendChild(contenido);
+                var contenedor = document.getElementById("info_evento");
+                contenedor.appendChild(parrafo);
+                
+                
+                var button = document.createElement("button");
+                var contenido2 = document.createTextNode("Entrar en el evento");
+                button.appendChild(contenido2);
+                button.setAttribute("data-value", eventos[r].codigo_evento);
+                button.setAttribute("id", "entrar");
+                contenedor.appendChild(button);
+                
+
+                elements.push(button);
+                
+            }
+        }
+        
+        console.log(elements);
+        for(var i = 0; i < elements.length ; i++){
+            elements[i].addEventListener("click", function(){
+            console.log($(this).attr('data-value'));
+            $.post("eventos", {'id':$(this).attr('data-value'),'num':1});
+            });
+        } 
+
+    }
+
+    document.getElementById('mostrar').addEventListener('click',(event) => {
+        document.getElementById('guardar').style.display = "inline";
+        document.getElementById('msg').style.display = "inline";
+        document.getElementById('msg1').style.display = "inline";
+        document.getElementById('msg2').style.display = "inline";
+        document.getElementById('msg3').style.display = "inline";
+        document.getElementById('msg5').style.display = "inline";
+        document.getElementById('msg4').style.display = "none";
+        document.getElementById('nombre_evento').style.display = "inline";
+        document.getElementById('descripcion_evento').style.display = "inline";
+        document.getElementById('hora_evento').style.display = "inline";
+        document.getElementById('dia_evento').style.display = "inline";
+        document.getElementById('abierto').style.display = "inline";
+        document.getElementById('info_evento').style.display = "none";
+
+        document.getElementById('mostrar').style.display = "none";
+    });
+ 
+    document.getElementById('guardar').addEventListener('click',(event) => {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function(){
+            if (this.status == 200){
+                console.log("petición enviada con exito");
+            }
+        };
+
+        var p = new FormData();
+        //Envio el código de la vivienda
+        p.append('xd',u);
+        p.append('nombre_evento',document.getElementById('nombre_evento').value);
+        p.append('descripcion_evento',document.getElementById('descripcion_evento').value);
+        p.append('hora_evento',document.getElementById('hora_evento').value);
+        p.append('dia_evento',document.getElementById('dia_evento').value);
+        p.append('abierto',document.getElementById('abierto').value);
+        p.append('num',0)
+        xhttp.open("POST","/eventos",true);
+        xhttp.send(p);
+    });
+
+
+ 
+</script>
+
+
+
+
+{% endblock %}

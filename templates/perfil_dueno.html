@@ -1,0 +1,43 @@
+{% extends "base_perfiles.html" %}
+
+{% block content %}
+      
+    <p>Tu nombre: {{h.username}}</p>
+    <p>Tu correo: {{h.correo_dueño}}</p>
+    <p>Tu contacto: {{h.contacto}}</p>
+
+    <p>----- Códigos de tus viviendas: -----</p>
+
+        {% for i in h.viviendasU %}
+
+            <p>Vivienda: {{i.codigo_Vivienda}} - Dirección {{ i.direccion_exacta }}</p>
+            <p>Estudiantes en esa vivienda:</p>
+            {% for o in u %}
+                {% if i.codigo_Vivienda == o.codigo_Vivienda %}
+                    {% for l in o.estudiantes %}
+                        <p>{{l.username}}</p>
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+        
+            <form method="post" action="{{ url_for('volverInicio') }}">
+                <button data-value = {{i.codigo_Vivienda}} id = "guardar" class="guardar">Eliminar vivienda</button>
+            </form>
+
+        {% endfor %}
+
+    <script>
+
+    var elements = document.querySelectorAll(".guardar");
+    for(var i = 0; i < elements.length ; i++){
+        elements[i].addEventListener("click", function(){
+            console.log($(this).attr('data-value'));
+            $.post("emininarVivienda", {'codigo' : $(this).attr('data-value')});
+        });
+    } 
+    console.log(elements);
+    
+    </script>
+
+    
+{% endblock %}

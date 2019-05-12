@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <p class="w3-jumbo">Logeate!</p>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+                {% for m in messages%}
+                    <li> {{ m }} </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+    <form method="post" action="{{ url_for('login') }}">
+        <p> Ingresa tu correo <p>
+        <p><input name="correo" type="text"></p>
+        <p> Ingresa tu contraseña </p>
+        <p><input name="password" type="password"></p>
+
+        <button class="w3-button w3-black w3-padding-large w3-large w3-margin-top">Entrar</button>
+    </form>
+</body>
+</html>

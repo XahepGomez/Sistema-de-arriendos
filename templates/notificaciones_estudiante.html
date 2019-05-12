@@ -1,0 +1,27 @@
+{% extends "base_notificaciones.html" %}
+
+{% block content %}
+
+  <p>Solicitudes sin respuesta:</p>
+
+    {% for i in solicitudes %}
+      {% if i.estado == "Pendiente" %}
+          <p>Código de la vivienda: {{i.Vivienda.codigo_Vivienda}}.
+            El dueño es: {{ i.Vivienda.dueño.username }}, la vivienda tiene un precio de {{ i.Vivienda.precio }}, es de tipo {{ i.Vivienda.tipo }} y la dirección es {{ i.Vivienda.direccion_exacta }}. Puedes contactarte con el al correo: {{ i.Vivienda.dueño.correo_dueño }} o al número: {{  i.Vivienda.dueño.contacto }}
+          </p>
+      {% endif %}
+    {% endfor %}
+
+
+    <p>Solicitudes rechazadas:</p>
+    
+    {% for i in solicitudes %}
+      {% if i.estado == "Rechazado" %}
+          <p> * Código de la vivienda: {{i.Vivienda.codigo_Vivienda}}.
+            El dueño es: {{ i.Vivienda.dueño.username }}, la vivienda tiene un precio de {{ i.Vivienda.precio }}, es de tipo {{ i.Vivienda.tipo }} y la dirección es {{ i.Vivienda.direccion_exacta }}. Puedes contactarte con el al correo: {{ i.Vivienda.dueño.correo_dueño }} o al número: {{  i.Vivienda.dueño.contacto }}
+          </p>
+      {% endif %}
+    {% endfor %}
+
+
+{% endblock %}

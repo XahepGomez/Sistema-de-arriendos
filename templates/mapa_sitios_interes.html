@@ -1,0 +1,109 @@
+{% extends "leaflet.html" %}
+
+
+{% block content2 %}
+
+    <form method="post" action="{{ url_for('volverInicio') }}">
+        <p id = "Nombre_sitio_info" style="display: none;"></p>
+        <p></p>
+        <p id = "Descripcion_sitio_info" style="display: none;"></p>
+        <p style="display: inline;" id = "msg"> Ingresa el nombre del sitio</p>
+        <p><input id="nombre_sitio" type="text" style="width:240px;height:30px" style="display: inline;"></p>
+        <p style="display: inline;" id = "msg1"> Ingresa la descripcion del sitio</p>
+        <p><input id="descripcion_sitios" type="text" style="width:240px;height:30px"></p>
+        <button id="guardar" style="display: inline;"> Guardar </button>
+    </form>
+   
+
+    <script type="text/javascript">
+        //Mostrar los datos de la base de datos
+        var marker = new Array();
+
+        var greenIcon = L.icon({
+            iconUrl:  'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png   ',
+
+            iconSize:     [25, 41], // size of the icon
+            shadowSize:   [50, 64], // size of the shadow
+            iconAnchor:   [12, 41], // point of the icon which will correspond to marker's location
+            shadowAnchor: [4, 62],  // the same for the shadow
+            popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+        
+        });
+
+        var sitios = {{ sitios|tojson|safe }}
+
+        for (var r = 0; r < sitios.length; r++) {
+            var single = sitios[r];
+            var LamMarker = L.marker([single.latitud, single.longitud],{icon: greenIcon,descripcion:single.descripcion,nombre_sitio:single.nombre_sitio});
+            marker.push(LamMarker);
+            marker[r].on('click', onClick);
+            marker[r].addTo(mymap);
+        };
+
+        function onClick(e) {
+            var i = this.options;
+            console.log(i);
+            event = e;
+            
+            document.getElementById('guardar').style.display = "none";
+            document.getElementById('nombre_sitio').style.display = "none";
+            document.getElementById('descripcion_sitios').style.display = "none";
+            document.getElementById('msg').style.display = "none";
+            document.getElementById('msg1').style.display = "none";
+            document.getElementById('Nombre_sitio_info').style.display = "inline";
+            document.getElementById('Nombre_sitio_info').innerHTML = "Nombre del lugar: " + i.nombre_sitio 
+            document.getElementById('Descripcion_sitio_info').style.display = "inline";
+            document.getElementById('Descripcion_sitio_info').innerHTML = "Descripcion: " + i.descripcion 
+            //Guardo el código de la vivienda
+            u = i.Codigo;
+        }
+
+
+        //Guardar en la base de datos
+        var popup = L.popup();
+        var marker1 = L.marker();
+        var x;
+    
+        function onMapClick(e) {
+
+            marker1.bindPopup("<p>Coordenadas:</p>" + e.latlng.toString());
+            x = e.latlng; 
+            console.log(x);
+            document.getElementById('guardar').style.display = "inline";
+            document.getElementById('nombre_sitio').style.display = "inline";
+            document.getElementById('descripcion_sitios').style.display = "inline";
+            document.getElementById('msg').style.display = "inline";
+            document.getElementById('msg1').style.display = "inline";
+            document.getElementById('Nombre_sitio_info').style.display = "none";
+            document.getElementById('Descripcion_sitio_info').style.display = "none";
+            marker1.setLatLng(e.latlng).addTo(mymap);                
+
+        }
+    
+        mymap.on('click', onMapClick)
+        
+        
+        document.getElementById('guardar').addEventListener('click',(event) => {
+
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function(){
+                if (this.status == 200){
+                    console.log("petición enviada con exito");
+                }
+            };
+
+            var data = new FormData();
+            data.append('latitud',x.lat);
+            data.append('longitud',x.lng);
+            data.append('nombre_sitio',document.getElementById('nombre_sitio').value)
+            data.append('descripcion_sitio',document.getElementById('descripcion_sitios').value)
+
+            xhttp.open("POST","/mapaSitiosInteres",true);
+            xhttp.send(data);
+
+        });
+
+
+    </script>
+
+{% endblock %}

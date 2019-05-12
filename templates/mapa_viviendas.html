@@ -1,0 +1,98 @@
+{% extends "leaflet.html" %}
+
+
+{% block content2 %}
+
+<form method="post" action="{{ url_for('volverInicio') }}">
+
+    <p> Ingresa la direccion exacta de la vivienda</p>
+    <p><input id="direccion_exacta" type="text" style="width:240px;height:30px"></p>
+    <p> Ingresa el precio del arriendo de la vivienda</p>
+    <p><input id="precio" type="text" style="width:260px;height:35px"></p>
+    <p> Ingresa la descripción de la vivienda</p>
+    <p><input id="descripcion" type="text" style="width:260px;height:40px"></p>
+    <p> Ingresa la reglas de la vivienda</p>
+    <p><input id="reglas" type="text" style="width:260px;height:40px"></p>
+
+    <p>Elige un tipo de vivienda</p>
+    <select name="OS" id="tipo">
+        <optgroup label="Tipos de vivienda"> 
+            <option value="A">A</option> 
+            <option value="B">B</option> 
+            <option value="C">C</option> 
+            <option value="D">D</option> 
+        </optgroup> 
+    </select>   
+
+    <p></p>
+
+    <p>Elige el periodo de pago</p>
+    <select name="OS" id="metodo">
+        <optgroup label="Periodo de pago"> 
+            <option value="Diario">Diario</option> 
+            <option value="Semanal">Semanal</option> 
+            <option value="Mensual">Mensual</option> 
+            <option value="Anual">Anual</option> 
+        </optgroup> 
+    </select>
+
+    <p></p>
+
+    <button class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white" id="guardar">Guardar vivienda</button> 
+</form>
+
+
+<script>
+
+    var popup = L.popup();
+    var marker = L.marker();
+    var marker2 = new Array();
+    var x;
+    
+    var ubicacionesY = {{ubi|tojson|safe}};
+
+    for (var r = 0; r < ubicacionesY.length; r++) {
+        var single = ubicacionesY[r];
+        var LamMarker = L.marker([single.Latitud, single.Longitud]);
+        marker2.push(LamMarker);
+        marker2[r].addTo(mymap);
+    };
+
+    function onMapClick(e) {
+        marker.bindPopup("<p>Coordenadas:</p>" + e.latlng.toString());
+        x = e.latlng; 
+        console.log(x);
+        
+        marker.setLatLng(e.latlng).addTo(mymap);                
+    }
+    
+    mymap.on('click', onMapClick)
+
+    document.getElementById('guardar').addEventListener('click',(event) => {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function(){
+            if (this.status == 200){
+                console.log("petición enviada con exito");
+            }
+        };
+
+        var data = new FormData();
+        data.append('latitud',x.lat);
+        data.append('longitud',x.lng);
+        data.append('precio',document.getElementById('precio').value);
+        data.append('descripcion',document.getElementById('descripcion').value);
+        data.append('reglas',document.getElementById('reglas').value);
+        data.append('tipo',document.getElementById('tipo').value);
+        data.append('metodo',document.getElementById('metodo').value);
+        data.append('direccion_exacta',document.getElementById('direccion_exacta').value);
+
+
+        xhttp.open("POST","/mapa",true);
+        xhttp.send(data);
+    });
+
+</script>
+
+
+{% endblock %}
+
