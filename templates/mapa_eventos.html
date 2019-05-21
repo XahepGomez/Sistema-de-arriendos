@@ -1,4 +1,4 @@
-{% extends "leaflet.html" %}
+{% extends "base_mapa.html" %}
 
 {% block content2 %}
 
@@ -31,7 +31,7 @@
 <p></p>
 
 
-<button id = "mostrar" style="display: none;">Crear evento en este sitio</button>
+<button id = "mostrar" class="w3-button w3-black w3-margin-top" style="display: none;">Crear evento en este sitio</button>
 <p></p>
 <p id = "msg4" style="display: none;">Eventos que tiene el lugar </p>
 <p></p>
@@ -42,7 +42,7 @@
 <p id = "guardar_participacion"></p>
 <p></p>
 <form method="post" action="{{ url_for('volverInicio') }}">
-    <button id = "guardar" style="display: none;">Guardar evento</button>
+    <button id = "guardar" class="w3-button w3-black w3-margin-top" style="display: none;">Guardar evento</button>
 </form>
 
 
@@ -118,6 +118,7 @@
                 var contenido2 = document.createTextNode("Entrar en el evento");
                 button.appendChild(contenido2);
                 button.setAttribute("data-value", eventos[r].codigo_evento);
+                button.setAttribute("class","w3-button w3-black w3-margin-top")
                 button.setAttribute("id", "entrar");
                 contenedor.appendChild(button);
                 

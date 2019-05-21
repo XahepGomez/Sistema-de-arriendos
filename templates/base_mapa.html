@@ -1,17 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <title>W3.CSS Template</title>
-<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"
+    integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+crossorigin=""/>   
+<script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"
+    integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg=="
+    crossorigin="">
+</script>
 <style>
 body,h1,h2,h3,h4,h5,h6 {font-family: "Lato", sans-serif}
 .w3-bar,h1,button {font-family: "Montserrat", sans-serif}
 .fa-anchor,.fa-coffee {font-size:200px}
+#mapid { 
+        position: relative;
+        width: 95%;
+        height: 560px;
+        box-shadow: 5px 5px 5px #888;
+    }
 </style>
 <body>
 
@@ -22,6 +35,7 @@ body,h1,h2,h3,h4,h5,h6 {font-family: "Lato", sans-serif}
     <form method="post" action="{{ url_for('volverInicio') }}">
         <button class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Inicio</button>
     </form>
+
     <form method="post" action="{{ url_for('logout') }}">
         <button class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white w3-right">Cerrar sesión</button>
     </form>
@@ -37,14 +51,39 @@ body,h1,h2,h3,h4,h5,h6 {font-family: "Lato", sans-serif}
 </div>
 
 <!-- Header -->
-<header class="w3-container w3-red w3-center" style="padding:40px 16px">
-  <h1 class="w3-margin w3-jumbo">Notificaciones</h1>
+<header class="w3-container w3-red w3-center" style="padding:45px 16px">
+  <h1 class="w3-margin w3-jumbo"></h1>
+  <img src="https://i.ibb.co/9wN3HM0/logohermositobonitodivinoxd.png">  
 </header>
 
 <!-- First Grid -->
-{% block content %}
 
-{% endblock %}
+<table >
+        <tr>  
+            <td width = "1250"> <div id = 'mapid'></div> </td>
+                    
+            <script>
+            //ESTA ES LA BASE DEL MAPA:
+            var mymap = L.map('mapid').
+                setView([7.06185, -73.087317],
+                16);
+
+            L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://cloudmade.com">CloudMade</a>',
+                maxZoom: 18,
+                id: 'mapbox.streets',
+                accessToken: 'your.mapbox.access.token',
+            }).addTo(mymap);
+        
+            </script>
+
+
+            <td width = "1000" >{% block content2 %}
+
+                    {% endblock %}</td>
+
+        </tr>
+</table>
 
 <script>
 // Used to toggle the menu on small screens when clicking on the menu button
@@ -60,4 +99,3 @@ function myFunction() {
 
 </body>
 </html>
-

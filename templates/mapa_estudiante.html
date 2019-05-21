@@ -1,4 +1,4 @@
-{% extends "leaflet.html" %}
+{% extends "base_mapa.html" %}
 
 {% block content2 %}
 
@@ -32,7 +32,7 @@
 
 
     <form method="post" action="{{ url_for('volverInicio') }}">
-        <button id="guardar" style="display: none;"> Notificar </button>
+        <button id="guardar" class="w3-button w3-black w3-margin-top" style="display: none;"> Notificar </button>
     </form>
 
     
@@ -40,20 +40,16 @@
 
 <script type="text/javascript">
 
-    //Colocar iconos personalizados para los enventos FALTA!
-
+    //Coloco iconos personalizados para los eventos
     var greenIcon = L.icon({
         iconUrl:  'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png   ',
-
-        iconSize:     [25, 41], // size of the icon
-        shadowSize:   [50, 64], // size of the shadow
-        iconAnchor:   [12, 41], // point of the icon which will correspond to marker's location
-        shadowAnchor: [4, 62],  // the same for the shadow
-        popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+        iconSize:     [25, 41], 
+        shadowSize:   [50, 64], 
+        iconAnchor:   [12, 41], 
+        shadowAnchor: [4, 62],  
+        popupAnchor:  [-3, -76] 
         
     });
-    
-    
 
     var popup = L.popup();
     var marker = L.marker();
@@ -77,12 +73,14 @@
 
     //Poner markers de viviendas
     for (var r = 0; r < ubicaciones.length; r++) {
+        
         var single = ubicaciones[r];
         console.log(single.Dueño);
-        var LamMarker = L.marker([single.Latitud, single.Longitud],{Dueño_Vivienda:single.Dueño, Descripcion:single.Descripcion, Reglas:single.Reglas, Codigo:single.Num, Correo:single.Correo_dueño,Precio:single.Precio,Tipo:single.Tipo,Metodo:single.Metodo});
+        var LamMarker = L.marker([single.Latitud, single.Longitud],{Dueño_Vivienda:single.Dueño, Descripcion:single.Descripcion, Reglas:single.Reglas, Codigo:single.Num, Correo:single.Correo_dueño,Precio:single.Precio,Tipo:single.Tipo,Metodo:single.Metodo,Direccion_exacta:single.direccion_exacta});
         marker.push(LamMarker);
         marker[r].on('click', onClick);
         marker[r].addTo(mymap);
+
     };
 
     //Poner markers de sitios de interes
@@ -103,7 +101,7 @@
         document.getElementById('Nombre_sitio_info').style.display = "none";
         document.getElementById('Descripcion_sitio_info').style.display = "none";
         document.getElementById('Descipcion_vivienda').style.display = 'inline';
-        document.getElementById('Descipcion_vivienda').innerHTML = "Dueño: " + i.Dueño_Vivienda + " <p></p> Precio de la vivienda: " + i.Precio + "<p></p> Tipo de vivienda: " + i.Tipo + "<p></p> Descripción: " + i.Descripcion + "<p></p> Reglas: " + i.Reglas + "<p></p> Metodo de pago: " + i.Metodo + "<p></p> Correo del dueño: " + i.Correo + "<p></p>";
+        document.getElementById('Descipcion_vivienda').innerHTML = "Dueño: " + i.Dueño_Vivienda + " <p></p> Dirección exacta: " + i.Direccion_exacta +" <p></p> Precio de la vivienda: " + i.Precio + "<p></p> Tipo de vivienda: " + i.Tipo + "<p></p> Descripción: " + i.Descripcion + "<p></p> Reglas: " + i.Reglas + "<p></p> Metodo de pago: " + i.Metodo + "<p></p> Correo del dueño: " + i.Correo + "<p></p>";
         document.getElementById('guardar').style.display = 'inline';
         document.getElementById('msg').style.display = 'inline';
         document.getElementById('msg1').style.display = 'inline';
@@ -163,9 +161,5 @@
 
     
 </script>
-
-<!--{%for i in ubi%}
-    <p>{{ i }}</p>
-{% endfor %}-->
 
 {% endblock %}

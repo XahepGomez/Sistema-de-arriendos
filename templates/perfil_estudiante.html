@@ -1,42 +1,82 @@
-{% extends "base_perfiles.html" %}
+{% extends "base_perfiles_estudiante.html" %}
 
 {% block content %}
-
-    <p>Tu nombre: {{h.username}}</p>
-    <p>Tu correo: {{h.correo_estudiante}}</p>
-    <p>Tu pais: {{h.pais}}</p>
-    <p>Tu edad: {{h.edad}} años</p>
-    <p>Tu contacto: {{h.contacto}}</p>
-
-    <p></p>
-    <p>----- Historial de tus viviendas [Revisar] -----</p>
-    {% for x in h.viviendas%}
-
-        <p>Código de la vivienda: {{x.codigo_Vivienda}}</p>
-        <p>Correo del dueño: {{x.dueño.username}}</p>
-
-    {% endfor %}
-
-    <p></p>
-    <p>----- Tus eventos -----</p>
-    {% for i in h.evento %}
-
-        <p>* Evento código: {{ i.codigo_evento }} con nombre {{i.nombre_evento}}, en {{ i.sitio.nombre_Interes }} el día {{ i.fecha }} a las {{ i.hora }}</p>
-        <p> Con las siguientes personas: </p>
-        {% if i.estudiantes == [] %}
-            <p>No hay nadie en este evento [Falta]</p>
-        {% endif %}
-        {% if i.estudiantes != [] %}
-            {% for o in i.estudiantes%}
-            <p> - {{ o.username }} </p>
-            {% endfor %}
-        {% endif %}
+<table>
+    
+    <tr>
+      <td valign="top" class = "w3-center" width = "300">
+          <p>Información de tu cuenta</p>
+          
+      </td>
+      <td valign="top" class = "w3-center"width = "300" >
+          <p> Historial de tus viviendas </p>
+          
+          
+      </td>
+      <td valign="top" class = "w3-center" width = "500">
+          <p> Tus eventos </p>
+          
+            
+          
+      </td>
+      <td valign="top" class = "w3-center" >
+        <p> Eventos en los que has estado </p>
         
-    {% endfor %}
-    <p>---- Eventos a los que asistiras o asististe----</p>
-    {% for y in h.estudianteE %}
-        <p>* Evento código: {{ y.codigo_evento }} con nombre {{y.nombre_evento}}, en {{ y.sitio.nombre_Interes }} el día {{ y.fecha }} a las {{ y.hora }}</p>
-    {% endfor %}
+      </td>
+    </tr>
+    <tr>
+        <td width = "400" valign="top">
+                <p>Tu nombre: {{h.username}}</p>
+                <p>Tu correo: {{h.correo_estudiante}}</p>
+                <p>Tu pais: {{h.pais}}</p>
+                <p>Tu edad: {{h.edad}} años</p>
+                <p>Tu contacto: {{h.contacto}}</p>
+                <p>Tu genero: {{h.genero}}</p>
+            
+        </td>
+        <td width = "400" valign="top">
+                {% for x in h.viviendas%}
+                <p>Código de la vivienda: {{x.codigo_Vivienda}}</p>
+                <p>Correo del dueño: {{x.dueño.correo_dueño}}</p>
+                <p>-----------------------------------------------</p>
+                {% endfor %}
+            
+            
+    
+        </td>
+        <td width = "400" valign="top">
+                {% for i in h.evento %}
 
+                <p>* Evento código: {{ i.codigo_evento }} con nombre {{i.nombre_evento}}, en {{ i.sitio.nombre_Interes }} el día {{ i.fecha }} a las {{ i.hora }}</p>
+                <p> Con las siguientes personas: </p>
+                {% if i.estudiantes == [] %}
+                    <p>No hay nadie</p>
+                {% endif %}
+                {% if i.estudiantes != [] %}
+                    {% for o in i.estudiantes%}
+                        <p> - {{ o.username }} </p>
+                    {% endfor %}
+                {% endif %}
+                <p>------------------------------------------------------------------</p>
+            {% endfor %}
+        </td>   
+        <td width = "400" valign="top">
+            {% for y in h.estudianteE %}
+                <p>* Evento código: {{ y.codigo_evento }} con nombre {{y.nombre_evento}}, en {{ y.sitio.nombre_Interes }} el día {{ y.fecha }} a las {{ y.hora }}</p>
+                <p>---------------------------------------------------------</p>
+            {% endfor %}
+            
+        </td>
+    </tr>
+  </table>
+
+    
+
+    <p></p>
+    
+
+    <p></p>
+    
+    
 
 {% endblock %}

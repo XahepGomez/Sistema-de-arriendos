@@ -12,19 +12,15 @@
         <table>
           <td>
             <form method="post" action="{{ url_for('volverInicio') }}">
-              <button class = "sender" data-value="{{i.codigo_Solicitud}}"> Aceptar </button>
+              <button class="w3-button w3-black w3-margin-top sender" data-value="{{i.codigo_Solicitud}}"> Aceptar </button>
             </form>
           </td>
           <td>
             <form method="post" action="{{ url_for('volverInicio') }}">
-              <button class = "negar" data-value="{{i.codigo_Solicitud}}">Rechazar</button>
+              <button class="w3-button w3-black w3-margin-top negar" data-value="{{i.codigo_Solicitud}}">Rechazar</button>
             </form>
           </td>
         </table>
-        
-
-
-        
        
       {% endif %}
     {% endif %}
