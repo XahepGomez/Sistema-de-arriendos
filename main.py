@@ -7,9 +7,7 @@ from sqlalchemy.sql import text
 from sqlalchemy.dialects import mysql
 from flask_marshmallow import Marshmallow
 from flask import json
-from sqlalchemy.ext.declarative import declarative_base
 import json
-Base = declarative_base()
 
 import requests
 import sqlite3
@@ -69,6 +67,7 @@ class Vivienda(db.Model):
     precio = db.Column(db.String(120),nullable=True)
     tipo = db.Column(db.String(1),nullable=True)
     metodo_pago = db.Column(db.String(120),nullable=True)
+    estado = db.Column(db.String(1),nullable=True)
     dueño_correo = db.Column(db.Integer,ForeignKey('dueño.correo_dueño'))
 
 
@@ -162,21 +161,18 @@ class Evento(db.Model):
 def inicio():
     estu = Estudiante.query.all()
     due = Dueño.query.all()
-    tipo = "Logueate"
 
     for i in session:
         for k in due:
             if session[i] == k.correo_dueño:
-                tipo = "Agregar vivienda"
-                print("El perfil actual es de: " + session[i])
+                return render_template("base_dueño.html")   
         
     for i in session:
         for k in estu:
             if session[i] == k.correo_estudiante:
-                tipo = "Ver viviendas"                
-                print("El perfil actual es de: " + session[i])
+                return render_template("base_estudiante.html")             
         
-    return render_template("base.html",tipo = tipo)
+    return render_template("base_sin_loguear.html")
 
 
 #----- Mapa para los dueños -----
@@ -190,7 +186,7 @@ def mapa():
         print(x)
 
         c = Dueño.query.filter_by(correo_dueño = session["correo_dueño"]).first()
-        new_vivienda = Vivienda(latitud = request.form['latitud'],longitud = request.form['longitud'],descripcion = request.form["descripcion"],reglas = request.form["reglas"],precio = request.form["precio"],tipo = request.form["tipo"],metodo_pago=request.form["metodo"],direccion_exacta = request.form["direccion_exacta"],dueño = c)
+        new_vivienda = Vivienda(latitud = request.form['latitud'],longitud = request.form['longitud'],descripcion = request.form["descripcion"],reglas = request.form["reglas"],precio = request.form["precio"],tipo = request.form["tipo"],metodo_pago=request.form["metodo"],direccion_exacta = request.form["direccion_exacta"],dueño = c,estado = "t")
         db.session.add(new_vivienda)
         db.session.commit()
         flash("Tu vivienda se ha registrado exitosamente!.")
@@ -199,7 +195,8 @@ def mapa():
     o = Vivienda.query.all()
     ubicaciones = []
     for i in o:
-        ubicaciones.append({"Latitud":i.latitud,"Longitud":i.longitud})
+        if i.estado == "t":
+            ubicaciones.append({"Latitud":i.latitud,"Longitud":i.longitud})
 
 
     return render_template("mapa_viviendas.html", ubi = ubicaciones)
@@ -211,7 +208,6 @@ def mapaEstudiante():
     if request.method == 'POST':
         #Aca recibo el código de la vivienda
         codigo_vivienda = request.form['xd']
-        print(codigo_vivienda)
 
         #Agrego a la tabla Solicitud
         x = Solicitud.query.all()
@@ -222,7 +218,6 @@ def mapaEstudiante():
         else:
             if codigo_SolicitudNew == None:
                 codigo_SolicitudNew = 1
-        print(codigo_SolicitudNew+1)
 
         #Guardo en la tabla solicitud
         i = Estudiante.query.filter_by(correo_estudiante = session["correo_estudiante"]).first()
@@ -233,18 +228,18 @@ def mapaEstudiante():
         render_template("base.html")
         return '200'   
 
-    #Envio la información de la viviendas para mostrarlas en el mapa
+    #Envio las viviendas 
     g = Vivienda.query.all()
     ubicaciones = []
     for i in g:
         l = i.dueño.username
         k = i.dueño.correo_dueño
-        ubicaciones.append({"Num":i.codigo_Vivienda,"Latitud":i.latitud,"Longitud":i.longitud,"Dueño":l,"Correo_dueño":k,"Descripcion":i.descripcion,"Reglas":i.reglas,"Precio":i.precio,"Tipo":i.tipo,"Metodo":i.metodo_pago})
+        if i.estado == "t":
+            ubicaciones.append({"Num":i.codigo_Vivienda,"Latitud":i.latitud,"Longitud":i.longitud,"Dueño":l,"Correo_dueño":k,"Descripcion":i.descripcion,"Reglas":i.reglas,"Precio":i.precio,"Tipo":i.tipo,"Metodo":i.metodo_pago,"direccion_exacta":i.direccion_exacta})
 
     #Envio sitios de interes
     x = Sitios_Interes.query.all()
     sitios = []
-
     for i in x:
         sitios.append({"codigo":i.codigo_Interes,"latitud":i.latitud_Interes,"longitud":i.longitud_Interes,"descripcion":i.descripcion_Interes,"nombre_sitio":i.nombre_Interes}) 
 
@@ -256,6 +251,7 @@ def mapaEstudiante():
 def registro_estudiante():
     if request.method == 'POST':
         x = Estudiante.query.filter_by(correo_estudiante = request.form["correo"]).first()
+        #Reviso si no esta en ninguna tabla ese correo
         y = Dueño.query.filter_by(correo_dueño = request.form["correo"]).first()
         if(x == None and y == None):
             hashed_pw=generate_password_hash(request.form["password"],method="sha256")
@@ -272,11 +268,12 @@ def registro_estudiante():
     return render_template("registro_estudiante.html")
 
 
-#----- Registro dueño: ----- 
+#----- Registro dueño ----- 
 @app.route("/registroDueño",methods=['GET','POST'])
 def registro_dueño():
     if request.method == 'POST':
         x = Dueño.query.filter_by(correo_dueño = request.form["correo"]).first()
+        #Reviso si no esta en ninguna tabla ese correo
         y = Estudiante.query.filter_by(correo_estudiante = request.form["correo"]).first()
         if(x == None and y == None):
             hashed_pw=generate_password_hash(request.form["password"],method="sha256")
@@ -296,19 +293,18 @@ def registro_dueño():
 def eventos():
 
     if request.method == 'POST':
-        #Aca recibo el código de la vivienda
         k = request.form['num']
         if k == "1":
+            #Guarda en la tabla asistencia_evento
             s = Evento.query.filter_by(codigo_evento = request.form['id']).first()
             l = Estudiante.query.filter_by(correo_estudiante = session["correo_estudiante"]).first()
             s.estudiantes.append(l)
             db.session.add(s)
             db.session.commit()
         else:
-            x = Evento.query.all()
+            #Guardo en la tabla evento
             c = Estudiante.query.filter_by(correo_estudiante = session["correo_estudiante"]).first()
             o = Sitios_Interes.query.filter_by(codigo_Interes = request.form['xd']).first()
-            #Guardo en la tabla evento
             new_evento = Evento(nombre_evento = request.form['nombre_evento'],descripcion_evento = request.form['descripcion_evento'],fecha = request.form['dia_evento'],hora = request.form['hora_evento'],abierta_publico = request.form['abierto'],estudiante_dueño = c,sitio = o)
             db.session.add(new_evento)
             db.session.commit()
@@ -318,13 +314,11 @@ def eventos():
 
     x = Sitios_Interes.query.all()
     sitios = []
-
     for i in x:
         sitios.append({"codigo":i.codigo_Interes,"latitud":i.latitud_Interes,"longitud":i.longitud_Interes,"descripcion":i.descripcion_Interes,"nombre_sitio":i.nombre_Interes})
 
     y = Evento.query.all()
     eventos = []
-
     for i in y:
         eventos.append({"codigo_evento":i.codigo_evento,"nombre_evento":i.nombre_evento ,"descripcion_evento":i.descripcion_evento,"fecha":i.fecha,"hora":i.hora,"abierta_publico":i.abierta_publico,"estudiante_dueño":i.estudiante_dueño.username,"codigo_sitio_interes":i.sitio.codigo_Interes})
 
@@ -340,21 +334,15 @@ def login():
         #Login para estudiante
         if estudiante and check_password_hash(estudiante.password, request.form["password"]):
 
-            print("Se ha logeado")
             session["correo_estudiante"] = estudiante.correo_estudiante
             session.pop("correo_dueño",None)
-            print("La session del dueño fue cerrada")
-            print(session["correo_estudiante"])
             return redirect("/")
         else:
             #Login para dueño
             if dueño and check_password_hash(dueño.password,request.form["password"]):
 
-                print("Se ha logeado")
                 session["correo_dueño"] = dueño.correo_dueño
                 session.pop("correo_estudiante",None)
-                print("La session del estudiante fue cerrada")
-                print(session["correo_dueño"])
                 return redirect("/")
 
     return render_template("login.html")
@@ -364,8 +352,6 @@ def login():
 @app.route("/perfilEstudiante",methods=['GET','POST'])
 def perfilEstudiante():
     x = Estudiante.query.filter_by(correo_estudiante=session["correo_estudiante"]).first()
-    print(x.evento)
-    #----- Mostrar las solicitudes aceptadas FALTA-----
    
     return render_template("perfil_estudiante.html",h = x)
 
@@ -374,36 +360,24 @@ def perfilEstudiante():
 @app.route("/perfilDueño",methods=['GET','POST'])
 def perfilDueño():
     if request.method == "POST":
+        #Eliminar vivienda
         u = request.form['codigo']
+        print(u)
         y = Solicitud.query.filter_by(codigo_vivienda = u).all()
         for i in y:
             db.session.delete(i)
             db.session.commit()
 
         x = Vivienda.query.filter_by(codigo_Vivienda = u).first()
-        db.session.delete(x)
+        x.estado = "f"
         db.session.commit()
+
 
 
     h = Dueño.query.filter_by(correo_dueño = session["correo_dueño"]).first()
     u = Vivienda.query.join(historial).join(Estudiante).filter((historial.c.correo_estudiante == Estudiante.correo_estudiante) 
                                             & (historial.c.vivienda_id == Vivienda.codigo_Vivienda)).all()
 
-    print(h.viviendasU)
-    print(u)
-
-    for o in h.viviendasU:
-        print(o.codigo_Vivienda)
-        for i in u:
-            if i.codigo_Vivienda == o.codigo_Vivienda:
-                for l in i.estudiantes:
-                    print(l.username)
-
-
-            
-
-    
-    #----- Mostrar cuales estudiantes estan en cada vivienda FALTA -----
 
     return render_template("perfil_dueno.html",h = h,u = u)
 
@@ -415,8 +389,6 @@ def notificacionesDueño():
     if request.method == 'POST':
         jn = request.form['id']
         r = request.form['num']
-        print(r)
-
         if r == "1":
             z = Solicitud.query.filter_by(codigo_Solicitud = jn).first()
             #Cambio el estado de la solicitud
@@ -438,16 +410,12 @@ def notificacionesDueño():
             z.estado = "Rechazado"
             db.session.commit() 
 
-
-        
-        
         return '200'
 
     #----- Envio las solicitudes -----
 
     x = Solicitud.query.all()
     solicitudes = []
-    
     for i in x:
         solicitudes.append({"Estudiante":i.estudiante,"Vivienda":i.vivienda,"estado":i.estado,"codigo_Solicitud":i.codigo_Solicitud,"fecha_entrada":i.fecha_entrada,"fecha_salida":i.fecha_salida})
         
@@ -473,10 +441,11 @@ def notificacionesEstudiante():
 @app.route("/mapaSitiosInteres",methods=['GET','POST'])
 def mapaSitiosInteres():
     if request.method == 'POST':
-        #Guarda la vivienda en la bd
-
+        #Guarda el sitio de interes en la bd
         y = request.form['latitud']
         p = request.form['longitud']
+        print(y)
+        print(p)
         new_sitio = Sitios_Interes(latitud_Interes = y,longitud_Interes=p,nombre_Interes=request.form['nombre_sitio'],descripcion_Interes=request.form['descripcion_sitio'])
         db.session.add(new_sitio)
         db.session.commit()
@@ -502,21 +471,6 @@ def logout():
     return redirect("/")
 
 
-@app.route("/emininarVivienda",methods=['GET','POST'])
-def emininarVivienda():
-    if request.method == 'POST':
-        u = request.form['codigo']
-        y = Solicitud.query.filter_by(codigo_vivienda = u).all()
-        for i in y:
-            db.session.delete(i)
-            db.session.commit()
-
-        x = Vivienda.query.filter_by(codigo_Vivienda = u).first()
-        db.session.delete(x)
-        db.session.commit()
-        return '200'
-        
-    return '200'
 
 
 
@@ -579,6 +533,17 @@ def probarNose2():
         print(x)
 
     return "Mira la consola"
+
+
+
+
+
+
+
+
+
+
+
 
 
 
